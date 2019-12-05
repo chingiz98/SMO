@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="edf">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Desktop/EDF-master/target/edf.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/edf4j-1.0b.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
