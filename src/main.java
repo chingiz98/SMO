@@ -18,9 +18,20 @@ public class main {
     static double t2 = INF;
     static double t3 = INF;
 
-    static double T = 540;
+    static double T = 3.8;
     static double lam = 2;
     static double t = 0;
+
+    static ArrayList<Double> times = new ArrayList<Double>();
+    //static ArrayList<Double> waitTimes = new ArrayList<Double>();
+    static double[] cameTimes = new double[1000000];
+    static double[] waitTimes = new double[1000000];
+    //SAS POINT
+    static double[] tempTimes = {1.0, 1.0, 1.0, 2.0, 3.5, 3.7, 4.0};
+    static double[] servTimes = {3.0, 2.0, 4.0, 3.0, 3.0, 2.0, 2.0};
+    static int count = 0;
+
+
 
     public static double randomInRange(double rangeMin, double rangeMax){
         Random r = new Random();
@@ -28,8 +39,59 @@ public class main {
         return randomValue;
     }
 
-    public static double genTime(double t, double lambda){
-        return t - 1 / (lambda * Math.log(randomInRange(0, 1)));
+    public static double genTime(double time, double lambda){
+
+        double val = tempTimes[count];
+        count++;
+        return val;
+
+        /*
+        double U2 = 0;
+        double U1 = 0;
+
+        do {
+            U1 = randomInRange(0, 1);
+            time = time - 1 / (lambda * Math.log(U1));
+            U2 = randomInRange(0, 1);
+        } while (U2 > (intensity(time) / lambda));
+
+        return time;
+
+*/
+
+        //return time - 1 / (lambda * Math.log(randomInRange(0, 1)));
+    }
+
+    public static double intensity(double time){
+        if(time < 120){
+            return time;
+        } else if (time >= 120 && time < 240){
+            return 2*time;
+        } else if (time >= 240 && time < 360){
+            return time;
+        } else {
+            return 15*time;
+        }
+    }
+
+    public static void printTimes(){
+        int count1 = 0;
+        int count2 = 0;
+        int count3 = 0;
+        int count4 = 0;
+
+        for(int i = 0; i < times.size(); i++){
+            if(times.get(i) < 120)
+                count1++;
+            if(times.get(i) >= 120 && times.get(i) < 240)
+                count2++;
+            if(times.get(i) >= 240 && times.get(i) < 360)
+                count3++;
+            if(times.get(i) >= 360)
+                count4++;
+        }
+
+        System.out.println("Times " + count1 + " " + count2 + " " + count3 + " " + count4);
     }
 
     public static double min(double a, double b, double c, double d) {
@@ -57,23 +119,24 @@ public class main {
     }
 
     public static double interval(){
-        double U = randomInRange(0, 1);
-        return (-1/lam) * Math.log(U);
+        double U = randomInRange(0, 5);
+        //return (-1/lam) * Math.log(U);
+        return U;
+    }
+
+    public static double interval(int i){
+        return servTimes[i - 1];
     }
 
     public static void main(String[] args) throws IOException {
 
-
-        
         int c1 = 0;
         int c2 = 0;
         int c3 = 0;
 
         double ta = INF;
 
-
-        ArrayList<Double> times = new ArrayList<>();
-
+        //ArrayList<Double> times = new ArrayList<>();
 
         System.out.println("123");
 
@@ -81,40 +144,54 @@ public class main {
 
         while (ta < T || n > 0) {
 
+            if(ta >= T)
+                ta = INF;
 
-            if(ta < t1 && ta < t2 && ta < t3){
+            if(ta < t1 && ta < t2 && ta < t3 && ta < T){
                 t = ta;
-                ta = genTime(t, lam);
 
-                na++;
+                if(ta < T){
+                    na++;
+                    ta = genTime(t, lam);
+                    times.add(t);
+                    cameTimes[na] = t;
+                }
+
+                else
+                    ta = INF;
+
+
+
+
+
 
                 if(n == 0 && i1 == 0 && i2 == 0 && i3 ==0){
                     setState(1, na, 0, 0);
-                    t1 = t + interval();
+                    t1 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 1 + " n is " + n);
                 } else if(n == 1 && i1 == 0 && i2 == 0 && i3 != 0){
                     setState(2, na, 0, i3);
-                    t1 = t + interval();
+                    t1 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 1 + " n is " + n);
                 }  else if(n == 1 && i1 == 0 && i2 != 0 && i3 == 0){
                     setState(2, na, i2, 0);
-                    t1 = t + interval();
+                    t1 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 1 + " n is " + n);
                 } else if(n == 2 && i1 == 0 && i2 != 0 && i3 != 0){
                     setState(3, na, i2, i3);
-                    t1 = t + interval();
+                    t1 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 1 + " n is " + n);
                 } else if(n == 1 && i1 != 0 && i2 == 0 && i3 == 0){
                     setState(2, i1, na, 0);
-                    t2 = t + interval();
+                    t2 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 2 + " n is " + n);
                 } else if(n == 2 && i1 != 0 && i2 == 0 && i3 != 0){
                     setState(3, i1, na, i3);
-                    t2 = t + interval();
+                    t2 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 2 + " n is " + n);
                 } else if(n == 2 && i1 != 0 && i2 != 0 && i3 == 0){
                     setState(3, i1, i2, na);
-                    t3 = t + interval();
+                    t3 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 3 + " n is " + n);
                 } else if (n > 2){
                     setState(n + 1, i1, i2, i3);
@@ -141,8 +218,11 @@ public class main {
                     setState(2, 0, i2, i3);
                     t1 = INF;
                 } else if (n > 3){
-                    setState(n - 1, max(i1, i2, i3) + 1, i2, i3);
-                    t1 = t + interval();
+                    int m = max(i1, i2, i3) + 1;
+                    setState(n - 1, m, i2, i3);
+                    waitTimes[m] = t - cameTimes[m];
+                    System.out.println("Client ID " + m + " wait time is " + waitTimes[m]);
+                    t1 = t + interval(m);
                 }
             }
 
@@ -165,8 +245,11 @@ public class main {
                     setState(2, i1, 0, i3);
                     t2 = INF;
                 } else if (n > 3){
-                    setState(n - 1, i1, max(i1, i2, i3) + 1, i3);
-                    t2 = t + interval();
+                    int m = max(i1, i2, i3) + 1;
+                    setState(n - 1, i1, m, i3);
+                    waitTimes[m] = t - cameTimes[m];
+                    System.out.println("Client ID " + (m) + " wait time is " + waitTimes[m]);
+                    t2 = t + interval(m);
                 }
             }
 
@@ -189,14 +272,24 @@ public class main {
                     setState(2, i1, i2, 0);
                     t3 = INF;
                 } else if (n > 3){
-                    setState(n - 1, i1, i2, max(i1, i2, i3) + 1);
-                    t3 = t + interval();
+                    int m = max(i1, i2, i3) + 1;
+                    setState(n - 1, i1, i2, m);
+                    waitTimes[m] = t - cameTimes[m];
+                    System.out.println("Client ID " + m + " wait time is " + waitTimes[m]);
+                    t3 = t + interval(m);
                 }
             }
 
 
         }
 
+        printTimes();
+        for (double t : times
+             ) {
+            System.out.print(Math.round(t) + " ");
+        }
+
+//непустые в wait_time / (na-1) - первая статистика
 
 
     }
