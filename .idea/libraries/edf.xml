@@ -3,6 +3,7 @@
     <CLASSES>
       <root url="jar://$USER_HOME$/Desktop/EDF-master/target/edf.jar!/" />
       <root url="jar://$USER_HOME$/Downloads/edf4j-1.0b.jar!/" />
+      <root url="jar://$USER_HOME$/Desktop/commons-math3-3.6.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
