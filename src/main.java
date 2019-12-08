@@ -20,7 +20,8 @@ public class main {
     static double t2 = INF;
     static double t3 = INF;
 
-    static double T = 540;
+    static double T = 9.1;
+    static double T2 = 4.0;
     static double lam = 4;
     static double t = 0;
 
@@ -29,8 +30,8 @@ public class main {
     static double[] cameTimes = new double[1000000];
     static double[] waitTimes = new double[1000000];
 
-    static double[] tempTimes = {1.0, 1.0, 1.0, 2.0, 3.5, 3.7, 4.0};
-    static double[] servTimes = {3.0, 2.0, 4.0, 3.0, 3.0, 2.0, 2.0};
+    static double[] tempTimes = {0.5, 0.8, 1.1, 2.6, 3.8, 4.0};
+    static double[] servTimes = {3.5, 4.1, 4.0, 3.6, 4.2, 3.9};
     static int count = 0;
 
     static double servTime = 0;
@@ -47,6 +48,7 @@ public class main {
 
     public static double genTime(double time, double lambda) {
 
+        /*
         double U2 = 0;
         double U1 = 0;
 
@@ -59,6 +61,15 @@ public class main {
         } while (U2 > (intensity(time) / lambda));
 
         return time;
+        */
+
+        if(count >= tempTimes.length)
+            return T + 200;
+
+        double r = tempTimes[count];
+        count++;
+        return r;
+
 
 
 
@@ -123,6 +134,8 @@ public class main {
 
     public static double interval(int index){
 
+
+        /*
         double prob = randomInRange(0, 1);
 
         double ret = 0;
@@ -151,6 +164,10 @@ public class main {
         return res;
 */
         //return U;
+
+        double r = servTimes[index - 1];
+        return r;
+
     }
 
     /*
@@ -177,6 +194,9 @@ public class main {
     static double lastCame = 0;
     static double sumLastCame = 0;
 
+    static boolean second = false;
+    static boolean third = false;
+
     public static void saveValues(){
 
         eventTimes[evCnt] = t;
@@ -193,16 +213,24 @@ public class main {
         if(evCnt != 0){
             clientsInQ[index] += t - eventTimes[evCnt - 1];
 
-            if(i1 != 0 && t < T){
-                w1Time += t - eventTimes[evCnt - 1];
+            if(i1 != 0 && t < T) {
+
+                    w1Time += t - eventTimes[evCnt - 1];
+
             }
 
             if(i2 != 0 && t < T){
-                w2Time += t - eventTimes[evCnt - 1];
+                if(second)
+                    w2Time += t - eventTimes[evCnt - 1];
+                else
+                    second = true;
             }
 
             if(i3 != 0 && t < T){
-                w3Time += t - eventTimes[evCnt - 1];
+                if(third)
+                    w3Time += t - eventTimes[evCnt - 1];
+                else
+                    third = true;
             }
 
         }
@@ -321,7 +349,7 @@ public class main {
 
 
             //уход1
-            if(t1 < ta && t1 <= t2 && t1 <= t3){
+            if(t1 <= ta && t1 != INF && t1 <= t2 && t1 <= t3){
                 //timeChange.add(t);
                 t = t1;
                 saveValues();
@@ -353,7 +381,7 @@ public class main {
             }
 
             //уход2
-            if(t2 < ta && t2 <= t1 && t2 <= t3){
+            if(t2 <= ta && t2 != INF && t2 <= t1 && t2 <= t3){
                 //timeChange.add(t);
                 t = t2;
                 saveValues();
@@ -383,7 +411,7 @@ public class main {
             }
 
             //уход3
-            if(t3 < ta && t3 <= t2 && t3 <= t1){
+            if(t3 <= ta && t3 != INF && t3 <= t2 && t3 <= t1){
                 //timeChange.add(t);
                 t = t3;
                 saveValues();
@@ -439,19 +467,11 @@ public class main {
 
         _Q /= T;
 
-        //System.out.println("Оценка ожидаемого среднего числа клиентов " + _Q);
         System.out.printf("Среднее число клиентов в очереди %.2f\n", _Q);
-
-        //System.out.println("Коэффициент занятости первого окна " + w1Time / T);
         System.out.printf("Коэффициент занятости первого окна %.3f\n", w1Time / T);
-        //System.out.println("Коэффициент занятости второго окна " + w2Time/T);
         System.out.printf("Коэффициент занятости второго окна %.3f\n", w2Time/T);
-        //System.out.println("Коэффициент занятости третьего окна " + w3Time/T);
         System.out.printf("Коэффициент занятости третьего окна %.3f\n", w3Time/T);
-        //System.out.println();
-        //System.out.println("Среднее время обслуживания " + servTime / na);
         System.out.printf("Среднее время обслуживания %.2f\n", servTime / na);
-        //System.out.println("Среднее время между поступлениями " + sumLastCame / (na - 1));
         System.out.printf("Среднее время между поступлениями %.2f\n", sumLastCame / (na - 1));
 
 
@@ -469,9 +489,22 @@ public class main {
 
         int hour = (int) timeline / 60 + 9;
         int min = (int) timeline - (hour - 9) * 60;
-        double sec = timeline - (int) timeline;
+        int sec = (int)((timeline - (int) timeline) * 60);
 
-        String result = hour + ":" + min + ":" + (int)(sec * 60);
+        String strHour = String.valueOf(hour);
+        if(hour < 10)
+            strHour = "0" + strHour;
+
+        String strMin = String.valueOf(min);
+        if(min < 10)
+            strMin = "0" + strMin;
+
+        String strSec = String.valueOf(sec);
+        if(sec < 10)
+            strSec = "0" + strSec;
+
+
+        String result = strHour + ":" + strMin + ":" + strSec;
 
         return result;
     }
