@@ -21,7 +21,7 @@ public class main {
     static double t3 = INF;
 
     static double T = 540;
-    static double lam = 15;
+    static double lam = 4;
     static double t = 0;
 
     static ArrayList<Double> times = new ArrayList<Double>();
@@ -32,12 +32,10 @@ public class main {
     static double[] tempTimes = {1.0, 1.0, 1.0, 2.0, 3.5, 3.7, 4.0};
     static double[] servTimes = {3.0, 2.0, 4.0, 3.0, 3.0, 2.0, 2.0};
     static int count = 0;
-    static PolynomialSplineFunction funcQ;
-    static PolynomialSplineFunction B1;
-    static PolynomialSplineFunction B2;
-    static PolynomialSplineFunction B3;
 
     static double servTime = 0;
+    static double sTimes[] = new double[99999];
+    static double leaveTimes[] = new double[99999];
 
 
 
@@ -56,7 +54,7 @@ public class main {
             U1 = randomInRange(0, 1);
             time = time - 1 / (lambda * Math.log(U1));
             U2 = randomInRange(0, 1);
-            System.out.println("U2= " + U2 + " LAMBDA " + (intensity(time) / lambda));
+            //System.out.println("U2= " + U2 + " LAMBDA " + (intensity(time) / lambda));
 
         } while (U2 > (intensity(time) / lambda));
 
@@ -123,7 +121,7 @@ public class main {
         return Collections.max(Arrays.asList(vals));
     }
 
-    public static double interval(){
+    public static double interval(int index){
 
         double prob = randomInRange(0, 1);
 
@@ -140,6 +138,9 @@ public class main {
         }
 
         servTime += ret;
+
+        sTimes[index] = ret;
+
         return ret;
 
         /*
@@ -152,9 +153,12 @@ public class main {
         //return U;
     }
 
+    /*
     public static double interval(int i){
         return servTimes[i - 1];
     }
+
+     */
 
     static ArrayList<Integer> clientsInQueue = new ArrayList<Integer>();
     static ArrayList<Integer> window1Status = new ArrayList<Integer>();
@@ -169,6 +173,9 @@ public class main {
     static double w1Time = 0;
     static double w2Time = 0;
     static double w3Time = 0;
+
+    static double lastCame = 0;
+    static double sumLastCame = 0;
 
     public static void saveValues(){
 
@@ -230,8 +237,7 @@ public class main {
         }
     }
 
-    static double lastCame = 0;
-    static double sumLastCame = 0;
+
 
     public static void main(String[] args) throws IOException {
 
@@ -240,10 +246,6 @@ public class main {
         int c3 = 0;
 
         double ta = INF;
-
-        //ArrayList<Double> times = new ArrayList<>();
-
-
 
         ta = genTime(t, lam);
 
@@ -280,31 +282,31 @@ public class main {
 
                 if(n == 0 && i1 == 0 && i2 == 0 && i3 ==0){
                     setState(1, na, 0, 0);
-                    t1 = t + interval();
+                    t1 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 1 + " n is " + n);
                 } else if(n == 1 && i1 == 0 && i2 == 0 && i3 != 0){
                     setState(2, na, 0, i3);
-                    t1 = t + interval();
+                    t1 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 1 + " n is " + n);
                 }  else if(n == 1 && i1 == 0 && i2 != 0 && i3 == 0){
                     setState(2, na, i2, 0);
-                    t1 = t + interval();
+                    t1 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 1 + " n is " + n);
                 } else if(n == 2 && i1 == 0 && i2 != 0 && i3 != 0){
                     setState(3, na, i2, i3);
-                    t1 = t + interval();
+                    t1 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 1 + " n is " + n);
                 } else if(n == 1 && i1 != 0 && i2 == 0 && i3 == 0){
                     setState(2, i1, na, 0);
-                    t2 = t + interval();
+                    t2 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 2 + " n is " + n);
                 } else if(n == 2 && i1 != 0 && i2 == 0 && i3 != 0){
                     setState(3, i1, na, i3);
-                    t2 = t + interval();
+                    t2 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 2 + " n is " + n);
                 } else if(n == 2 && i1 != 0 && i2 != 0 && i3 == 0){
                     setState(3, i1, i2, na);
-                    t3 = t + interval();
+                    t3 = t + interval(na);
                     System.out.println("Next client came at " + t + " at win " + 3 + " n is " + n);
                 } else if (n > 2){
                     setState(n + 1, i1, i2, i3);
@@ -327,6 +329,8 @@ public class main {
 
                 c1++;
                 System.out.println("Leaving window1 at " + t);
+                leaveTimes[i1] = t;
+
                 if(n == 1){
                     setState(0, 0, 0, 0);
                     t1 = INF;
@@ -344,7 +348,7 @@ public class main {
                     setState(n - 1, m, i2, i3);
                     waitTimes[m] = t - cameTimes[m];
                     System.out.println("Client ID " + m + " wait time is " + waitTimes[m]);
-                    t1 = t + interval();
+                    t1 = t + interval(m);
                 }
             }
 
@@ -355,7 +359,7 @@ public class main {
                 saveValues();
                 c2++;
                 System.out.println("Leaving window2 at " + t);
-
+                leaveTimes[i2] = t;
                 if(n == 1){
                     setState(0, 0, 0, 0);
                     t2 = INF;
@@ -366,6 +370,7 @@ public class main {
                     setState(1, 0, 0, i3);
                     t2 = INF;
                 } else if(n == 3){
+
                     setState(2, i1, 0, i3);
                     t2 = INF;
                 } else if (n > 3){
@@ -373,7 +378,7 @@ public class main {
                     setState(n - 1, i1, m, i3);
                     waitTimes[m] = t - cameTimes[m];
                     System.out.println("Client ID " + (m) + " wait time is " + waitTimes[m]);
-                    t2 = t + interval();
+                    t2 = t + interval(m);
                 }
             }
 
@@ -384,7 +389,7 @@ public class main {
                 saveValues();
                 c3++;
                 System.out.println("Leaving window3 at " + t);
-
+                leaveTimes[i3] = t;
                 if(n == 1){
                     setState(0, 0, 0, 0);
                     t3 = INF;
@@ -402,7 +407,7 @@ public class main {
                     setState(n - 1, i1, i2, m);
                     waitTimes[m] = t - cameTimes[m];
                     System.out.println("Client ID " + m + " wait time is " + waitTimes[m]);
-                    t3 = t + interval();
+                    t3 = t + interval(m);
                 }
             }
 
@@ -410,10 +415,6 @@ public class main {
         }
 
         printTimes();
-        for (double t : times
-             ) {
-            System.out.print(Math.round(t) + " ");
-        }
 
 //непустые в wait_time / (na-1) - первая статистика
 
@@ -423,69 +424,12 @@ public class main {
             sum += waitTimes[i];
         }
         System.out.println(" ");
-        for (int t : clientsInQueue
-        ) {
-            System.out.print(t + " ");
-        }
-
-        System.out.println("SIZE " + clientsInQueue.size());
-
-        System.out.println("Средняя задержка в очереди " + sum / (na - 1));
-
-        LinearInterpolator interpolator = new LinearInterpolator();
-
-        double arrX[] = new double[clientsInQueue.size()];
-        for(int i = 0; i < clientsInQueue.size(); i++){
-            arrX[i] = i;
-        }
-        double arrY[] = clientsInQueue.stream().mapToDouble(d->d).toArray();
-        funcQ = interpolator.interpolate(arrX, arrY);
 
 
+        System.out.println("SIZE " + clientsInQueue.size() + "\n");
 
-
-
-        double arrX_B1[] = new double[window1Status.size()];
-        for(int i = 0; i < window1Status.size(); i++){
-            arrX_B1[i] = i;
-        }
-        double arrY_B1[] = window1Status.stream().mapToDouble(d->d).toArray();
-        B1 = interpolator.interpolate(arrX_B1, arrY_B1);
-
-
-
-
-
-        double arrX_B2[] = new double[window2Status.size()];
-        for(int i = 0; i < window2Status.size(); i++){
-            arrX_B2[i] = i;
-        }
-        double arrY_B2[] = window2Status.stream().mapToDouble(d->d).toArray();
-        B2 = interpolator.interpolate(arrX_B2, arrY_B2);
-
-
-
-
-
-
-        double arrX_B3[] = new double[window3Status.size()];
-        for(int i = 0; i < window3Status.size(); i++){
-            arrX_B3[i] = i;
-        }
-        double arrY_B3[] = window3Status.stream().mapToDouble(d->d).toArray();
-        B3 = interpolator.interpolate(arrX_B3, arrY_B3);
-
-
-
-
-
-        System.out.println();
-        for(int i = 0; i < arrY.length; i++){
-            System.out.print((int) funcQ.value(i) + " ");
-        }
-        System.out.println();
-        System.out.println(funcQ.value(0.9));
-
+        System.out.printf("Средняя задержка в очереди %.2f\n", sum / (na - 1));
+        //System.out.println("Средняя задержка в очереди " + sum / (na - 1));
 
         double _Q = 0;
 
@@ -495,42 +439,46 @@ public class main {
 
         _Q /= T;
 
-        System.out.println("Оценка ожидаемого среднего числа клиентов " + IntSimpson(0, arrY.length - 1, 1000, funcQ)/T);
-        System.out.println("Оценка ожидаемого среднего числа клиентов " + _Q);
+        //System.out.println("Оценка ожидаемого среднего числа клиентов " + _Q);
+        System.out.printf("Среднее число клиентов в очереди %.2f\n", _Q);
 
-        double integral1 = IntSimpson(0, arrY_B1.length - 1, 1000, B1);
-        double integral2 = IntSimpson(0, arrY_B2.length - 1, 1000, B2);
-        double integral3 = IntSimpson(0, arrY_B3.length - 1, 1000, B3);
-
-        System.out.println("Коэффициент занятости первого окна " + integral1/T);
-        System.out.println("Коэффициент занятости второго окна " + integral2/T);
-        System.out.println("Коэффициент занятости третьего окна " + integral3/T);
-        System.out.println();
-        System.out.println("Коэффициент занятости первого окна " + w1Time / T);
-        System.out.println("Коэффициент занятости второго окна " + w2Time/T);
-        System.out.println("Коэффициент занятости третьего окна " + w3Time/T);
-
-        System.out.println();
-        System.out.println("Среднее время обслуживания " + servTime / na);
-        System.out.println("Среднее время между поступлениями " + sumLastCame / (na - 1));
-
-    }
+        //System.out.println("Коэффициент занятости первого окна " + w1Time / T);
+        System.out.printf("Коэффициент занятости первого окна %.3f\n", w1Time / T);
+        //System.out.println("Коэффициент занятости второго окна " + w2Time/T);
+        System.out.printf("Коэффициент занятости второго окна %.3f\n", w2Time/T);
+        //System.out.println("Коэффициент занятости третьего окна " + w3Time/T);
+        System.out.printf("Коэффициент занятости третьего окна %.3f\n", w3Time/T);
+        //System.out.println();
+        //System.out.println("Среднее время обслуживания " + servTime / na);
+        System.out.printf("Среднее время обслуживания %.2f\n", servTime / na);
+        //System.out.println("Среднее время между поступлениями " + sumLastCame / (na - 1));
+        System.out.printf("Среднее время между поступлениями %.2f\n", sumLastCame / (na - 1));
 
 
-    static double IntSimpson(double a, double b,int n, PolynomialSplineFunction func){
-        int i,z;
-        double h,s;
-
-        n=n+n;
-        s = func.value(a) * func.value(b);
-        h = (b-a)/n;
-        z = 4;
-
-        for(i = 1; i<n; i++){
-            s = s + z * func.value(a + i * h);
-            z = 6 - z;
+        System.out.printf("№     Ai       Di      Vi      Wi\n");
+        for(int i = 0; i <= na; i++){
+            //System.out.println(i + " " + cameTimes[i] + " " + leaveTimes[i] + " " + sTimes[i] + " " + waitTimes[i] + " " + convertToTime(cameTimes[i]) + " " + convertToTime(leaveTimes[i]));
+            System.out.printf("%d     %.2f    %.2f    %.2f    %.2f    %s    %s\n", i, cameTimes[i], leaveTimes[i], sTimes[i], waitTimes[i], convertToTime(cameTimes[i]), convertToTime(leaveTimes[i]));
         }
-        return (s * h)/3;
+
     }
+
+    public static String convertToTime(double inputTime)
+    {
+        double timeline = inputTime;
+
+        int hour = (int) timeline / 60 + 9;
+        int min = (int) timeline - (hour - 9) * 60;
+        double sec = timeline - (int) timeline;
+
+        String result = hour + ":" + min + ":" + (int)(sec * 60);
+
+        return result;
+    }
+
+
+
+
+
 
 }
