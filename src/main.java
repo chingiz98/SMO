@@ -213,20 +213,20 @@ public class main {
         if(evCnt != 0){
             clientsInQ[index] += t - eventTimes[evCnt - 1];
 
-            if(i1 != 0 && t < T) {
+            if(i1 != 0 && t <= T) {
 
                     w1Time += t - eventTimes[evCnt - 1];
 
             }
 
-            if(i2 != 0 && t < T){
+            if(i2 != 0 && t <= T){
                 if(second)
                     w2Time += t - eventTimes[evCnt - 1];
                 else
                     second = true;
             }
 
-            if(i3 != 0 && t < T){
+            if(i3 != 0 && t <= T){
                 if(third)
                     w3Time += t - eventTimes[evCnt - 1];
                 else
@@ -448,7 +448,7 @@ public class main {
 
         System.out.println(" ");
         double sum = 0;
-        for(int i = 0; i < na - 1; i++){
+        for(int i = 0; i <= na; i++){
             sum += waitTimes[i];
         }
         System.out.println(" ");
@@ -456,7 +456,7 @@ public class main {
 
         System.out.println("SIZE " + clientsInQueue.size() + "\n");
 
-        System.out.printf("Средняя задержка в очереди %.2f\n", sum / (na - 1));
+        System.out.printf("Средняя задержка в очереди %.2f\n", sum / (na));
         //System.out.println("Средняя задержка в очереди " + sum / (na - 1));
 
         double _Q = 0;
